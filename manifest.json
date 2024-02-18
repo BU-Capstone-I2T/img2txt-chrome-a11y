@@ -7,5 +7,20 @@
     "default_popup": "popup/I2T.html",
     "default_icon": "images/I2T.png"
   },
+  "type": "module",
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "all_frames": true,
+      "run_at": "document_end"
+    }
+  ],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgCbCzZOvwmzsUVUBanRcQkx908CgLEDhqM7L95HTPbx1fdWIxTu5Q2krEJmUUZ+2Pe5NWNFaYNLUtuD2gu/s2hZVfKHcFAhFP4pDH7xS3yVFdcQ+EQpwUBTS8jKIccEDI2RRl8u9B1W8YTE+I+8o+NWUBv5KVS843lPoGj3uiq+GiZJJI81dDGNu3KGBDP0yaem5Ec1l2LsvIwEJQsI5DPMOzZze3RCsIoqOMpzjtokC5gP8t2VzngXemPqvf3TZkdUbcZSTrzQgtY+m8OECIT4X/cn1IoF0ug8y7Vr7HHDahPFzTlu+boRCmNvFxm3z8n6K/91vYQ36DVFss5R9KwIDAQAB"
 }
