@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Image To Text",
-  "description": "Base Level Extension",
-  "version": "1.0",
+  "name": "Alt-Text AI",
+  "description": "Generates image descriptions for use with screen readers",
+  "version": "0.0.0",
   "action": {
     "default_popup": "popup/I2T.html",
     "default_icon": "images/I2T.png"

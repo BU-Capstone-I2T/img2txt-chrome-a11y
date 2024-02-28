@@ -11,16 +11,18 @@ This project uses the following technologies:
 - [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML)
 - [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 - [Chrome Extensions](https://developer.chrome.com/docs/extensions/mv3/)
+- [Node.js](https://nodejs.org/en/)
+- [TensorFlow.js](https://www.tensorflow.org/js)
 
 ## Installation
 
 To install this Chrome extension, follow these steps:
 
-1. Zip the extension folder using the following command: `zip -r ../extension.zip . -x "*.git/*"`
+1. Build the extension using the following command: `npm install && npm run build`
 2. Open the Chrome browser and navigate to `chrome://extensions`
 3. Enable Developer mode by ticking the checkbox in the upper-right corner
 4. Click on the "Load unpacked" button
-5. Select the zipped extension folder
+5. Select the `dist` folder
 
 ## Authors
 

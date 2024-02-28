@@ -1,0 +1,19 @@
+{
+  "name": "img2txt-chrome-a11y",
+  "version": "0.1.0",
+  "description": "Generates image descriptions for use with screen readers",
+  "scripts": {
+    "copy": "mkdir -p dist/src && cp src/content.js dist/src/",
+    "build": "parcel build src/background.js --dist-dir dist/src/ && npm run copy",
+    "watch": "npm run copy && parcel watch src/background.js --dist-dir dist/src/"
+  },
+  "devDependencies": {
+    "buffer": "^6.0.3",
+    "parcel": "^2.11.0",
+    "process": "^0.11.10"
+  },
+  "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.17.0"
+  }
+}

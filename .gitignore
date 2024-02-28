@@ -1,0 +1,6 @@
+# Node
+node_modules/
+.parcel-cache/
+
+# Compiled source
+dist/src/
