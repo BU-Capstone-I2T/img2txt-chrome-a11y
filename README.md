@@ -35,4 +35,3 @@ This project was created by:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-A Chrome extension that generates detailed image descriptions for screen readers
