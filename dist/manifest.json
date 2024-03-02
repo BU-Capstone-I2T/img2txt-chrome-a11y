@@ -5,9 +5,13 @@
   "version": "0.0.0",
   "action": {
     "default_popup": "popup/I2T.html",
-    "default_icon": "images/I2T.png"
+    "default_icon": "images/icon128.png"
   },
-  "type": "module",
+  "icons": {
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+   "128": "images/icon128.png"
+  },
   "host_permissions": [
     "<all_urls>"
   ],

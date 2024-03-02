@@ -1,9 +1,9 @@
 {
   "name": "img2txt-chrome-a11y",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Generates image descriptions for use with screen readers",
   "scripts": {
-    "copy": "mkdir -p dist/src && cp src/content.js dist/src/",
+    "copy": "mkdir -p dist/src && cp src/content.js dist/src/ && cp -r popup dist/",
     "build": "parcel build src/background.js --dist-dir dist/src/ && npm run copy",
     "watch": "npm run copy && parcel watch src/background.js --dist-dir dist/src/"
   },
