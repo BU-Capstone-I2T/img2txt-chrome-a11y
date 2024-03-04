@@ -38,7 +38,6 @@ const addLoadListenerToImage = (image) => {
 
 // Observe the DOM for added images
 const observeDOMChanges = () => {
-    // TODO: Use a newer API to observe the DOM for added images... this throws a warning
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
