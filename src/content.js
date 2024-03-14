@@ -44,6 +44,11 @@ function logError(message) {
 
 // This function will be executed on each image once it is loaded
 const sendImageToServiceWorker = (image) => {
+    // Check if the image already has alt text
+    if (image.alt) {
+        log("Image " + image.src + " already has alt text: " + image.alt);
+        return;
+    }
     // TODO: serialize the image and send it to the service worker to be fed into the image
     //       captioning model (see TF project). The service worker will reply with a message,
     //       and the content script will update the image caption of the corresponding URL
