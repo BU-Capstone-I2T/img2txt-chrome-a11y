@@ -12,6 +12,8 @@ const ACTION_DESCRIBE_IMAGE = 'DESCRIBE_IMAGE';
 const ACTION_LOG = 'LOG';
 const ACTION_ERROR = 'ERROR';
 
+// Size of the image expected by mobilenet.
+const IMAGE_SIZE = 224;
 
 // Feedback logging mechanism
 function logImageDetails() {
@@ -43,36 +45,69 @@ function logError(message) {
 
 
 // This function will be executed on each image once it is loaded
-const sendImageToServiceWorker = (image) => {
-    // Check if the image already has alt text
-    if (image.alt) {
-        log("Image " + image.src + " already has alt text: " + image.alt);
+const sendImageToServiceWorker = (img, drawableImg) => {
+    // Check if the image url ends in .svg
+    if (img.src.endsWith('.svg')) {
+        log(`Image ${img.src} is an SVG and will not be described`);
         return;
     }
-    // TODO: serialize the image and send it to the service worker to be fed into the image
-    //       captioning model (see TF project). The service worker will reply with a message,
-    //       and the content script will update the image caption of the corresponding URL
-    //       (or id). If using id, then we will need to set the id first!
-    // For now, we will just send the image URL to the service worker
-    chrome.runtime.sendMessage({ action: ACTION_DESCRIBE_IMAGE, url: image.src }, (response) => {
-        console.debug('Received response from service worker:', response);
+
+    // Check if the image already has alt text
+    if (img.alt) {
+        log(`Image ${img.src} already has alt text: ${img.alt}`);
+        return;
+    }
+
+    log(`Image ${img.src} is being sent to the service worker for description`);
+
+    // Scale the image and get the pixel data
+    const canvas = new OffscreenCanvas(IMAGE_SIZE, IMAGE_SIZE);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(drawableImg, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
+    const imageData = ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
+
+    // Create a message to send to the service worker
+    message = {
+        action: ACTION_DESCRIBE_IMAGE,
+        url: img.src,
+        rawImageData: Array.from(imageData.data),
+        width: IMAGE_SIZE,
+        height: IMAGE_SIZE,
+    };
+
+    // Send the data to the service worker
+    chrome.runtime.sendMessage(message, (response) => {
+        log(`Received response from service worker: ${JSON.stringify(response)} for image ${img.src}`);
         // Update the image caption with the response from the service worker
-        image.alt = response.description;
-        log("URL, text: " + image.url + " " + image.alt)
+        img.alt = response.description;
     });
 };
 
 
 // Function to add a 'load' event listener to an image
-const addLoadListenerToImage = (image) => {
-    // Check if the image is already loaded (important for cached images)
-    if (image.complete) {
-        log("sent image to service worker: " + image)
-        sendImageToServiceWorker(image);
+const addLoadListenerToImage = (img) => {
+    if (img.crossOrigin === 'anonymous') {
+        // Check if the image is already loaded (important for cached images)
+        if (img.complete) {
+            sendImageToServiceWorker(img, img);
+        } else {
+            // If the image is not yet loaded, listen for the load event
+            log(`Adding load listener for image: ${img.src}`)
+            img.addEventListener('load', () => sendImageToServiceWorker(img, img));
+        }
     } else {
-        // If the image is not yet loaded, listen for the load event
-        log("add load listener for image: " + image)
-        image.addEventListener('load', () => sendImageToServiceWorker(image));
+        // Create a copy of the image with crossOrigin set to anonymous so that it can be
+        // drawn to a canvas. This is necessary for images that are protected by CORS.
+        const drawableImg = new Image();
+        drawableImg.crossOrigin = 'anonymous';
+        drawableImg.onerror = () => {
+            logError(`Could not load image from external source: ${img.src}`);
+        };
+        log(`Adding load listener for CORS-protected image: ${img.src}`)
+        drawableImg.addEventListener('load', () => {
+            sendImageToServiceWorker(img, drawableImg);
+        });
+        drawableImg.src = img.src;
     }
 };
 

@@ -6,17 +6,22 @@
  * See the Chrome extension documentation for more information:
  * https://developer.chrome.com/docs/extensions/mv3/background_pages/
  */
+
+import I2TModelXS from './i2t-model-xs.js';
+
 // Constants
 const ACTION_DESCRIBE_IMAGE = 'DESCRIBE_IMAGE';
 const ACTION_LOGIN = 'LOGIN';
 const ACTION_LOG = 'LOG';
 const ACTION_ERROR = 'ERROR';
 const SERVER_URL = 'https://i2tcapstone.azurewebsites.net';
-const SERVER_DESCRIBE_PATH = "/i2t/describe";
 const SERVER_LOGIN_PATH = "/users/login"
 const SERVER_LOG = "/logs"
 let resolveToken = () => {};
 const TOKEN = new Promise((resolve) => resolveToken = resolve);
+
+// Load the i2t model
+const model = new I2TModelXS();
 
 // Gets access token from storage
 function getToken() {
@@ -37,57 +42,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (message.name === ACTION_LOG) {
         // Logs message
         log(message.msg);
+        return false; // Indicate synchronous response
     } else if (message.name === ACTION_ERROR) {
         // Error logs
         logError(message.msg, message.stack);
+        return false; // Indicate synchronous response
     } else if (message.action === ACTION_DESCRIBE_IMAGE) {
         describe(message, sendResponse);
     }
-    return true; // Required to keep the message channel open while waiting for the response
-
+    return true; // Indicate asynchronous response
 })
 
-// requests server to describe
+// request i2t model to describe
 function describe(message, sendResponse) {
-    getToken().then(token => {
-        // Listen for messages from the content script
-        log("Received request to describe image: " + message.url)
+    if (!message.height || !message.width || !message.rawImageData) {
+        logError("Invalid image data");
+        return;
+    }
+    log(`Received image to describe: ${message.url}`)
 
-        // Send the image URL to the server to be described
-        fetch(`${SERVER_URL}${SERVER_DESCRIBE_PATH}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ url: message.url }),
-        })
+    // Convert raw image data to ImageData
+    const imageData = new ImageData(
+        Uint8ClampedArray.from(message.rawImageData), message.width, message.height);
 
-            // Check if the server responded with an error
-            .then(response => {
-                if (!response.ok) {
-                    console.error(`Server responded with ${response.status} ${response.statusText} for image ${message.url}`)
-                    if (response.status === 422) {
-                        logError("Invalid image URL: " + message.url)
-                        throw new Error('Invalid image URL: ' + message.url);
-                    }
-                    throw new Error('Server failed to describe the image');
-                }
-                return response;
-                // Parse the response as JSON
-            }).then(response => {
-            return response.json();
-        })
-            // Send the description back to the content script
-            .then(data => {
-                sendResponse({ description: data.description });
-            })
-            // Handle any errors that occurred during the request
-            .catch(error => {
-                logError("Failed to get image description: " + error)
-                sendResponse({ description: error.message });
-            });
-    })
+    // Request the i2t model to describe the image
+    model.describeImage(imageData, message.url).then((desription) => {
+        sendResponse({ description: desription });
+    }).catch((err) => {
+        logError(err);
+        sendResponse({ description: "An error occurred while describing the image." });
+    });
 }
 
 // Gets access token
