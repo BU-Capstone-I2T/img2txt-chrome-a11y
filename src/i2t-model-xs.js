@@ -87,22 +87,65 @@ class NLPModel {
      * objects.
      */
     textContentFromPrediction(predictions) {
+        // no predictions
         if (!predictions || predictions.length < 1) {
-            return `No prediction 🙁`;
+            return `Image unclear`;
         }
-        // Confident.
-        if (predictions[0].probability >= HIGH_CONFIDENCE_THRESHOLD) {
-            return `😄 ${predictions[0].className}!`;
+        // seperate predictions based on confidence
+        let highpred = [];
+        let midpred = [];
+        let lowpred = [];
+        // grab confident predictions
+        const high = predictions.filter(prediction => prediction.probability >= HIGH_CONFIDENCE_THRESHOLD);
+        if (high.length > 0) {
+            highpred = high.map(prediction => prediction.className);
         }
-        // Not Confident.
-        if (predictions[0].probability >= LOW_CONFIDENCE_THRESHOLD &&
-            predictions[0].probability < HIGH_CONFIDENCE_THRESHOLD) {
-            return `${predictions[0].className}?...\n Maybe ${predictions[1].className}?`;
+        // grab mid predictions
+        const mid = predictions.filter(prediction => prediction.probability >= LOW_CONFIDENCE_THRESHOLD && prediction.probability < HIGH_CONFIDENCE_THRESHOLD);
+        if (mid.length > 0) {
+            midpred = mid.map(prediction => prediction.className);
         }
-        // Very not confident.
-        if (predictions[0].probability < LOW_CONFIDENCE_THRESHOLD) {
-            return `😕  ${predictions[0].className}????...\n Maybe ${predictions[1].className}????`;
+        // grab low predictions
+        const low = predictions.filter(prediction => prediction.probability < LOW_CONFIDENCE_THRESHOLD);
+        if (low.length > 0) {
+            lowpred = low.map(prediction => prediction.className);
         }
+        // result statement
+        let result = "Image that ";
+        if (highpred.length > 0) {
+            result += "contains ";
+            if (highpred.length > 1) {
+                result += `${highpred.slice(0, -1).join(', ')} and ${highpred[highpred.length - 1]}`;
+            } else {
+                result += `${highpred[0]}`;
+            }
+        }
+        if (midpred.length > 0) {
+            if (highpred.length > 0) {
+                result += " and maybe has ";
+            } else {
+                result += "may contain ";
+            }
+            if (midpred.length > 1) {
+                result += `${midpred.slice(0, -1).join(', ')} and ${midpred[midpred.length - 1]}`;
+            } else {
+                result += `${midpred[0]}`;
+            }
+        }
+        if (lowpred.length > 0) {
+            if (highpred.length === 0 && midpred.length === 0) {
+                result += "possibly contains ";
+            } else {
+                result += " and could possibly have ";
+            }
+            if (lowpred.length > 1) {
+                result += `${lowpred.slice(0, -1).join(', ')} and ${lowpred[lowpred.length - 1]}`;
+            } else {
+                result += `${lowpred[0]}`;
+            }
+            result += ".";
+        }
+        return result;
     }
 }
 
