@@ -5,3 +5,6 @@ node_modules/
 # Compiled source
 dist/src/
 dist/popup/
+
+# Testing
+coverage/
