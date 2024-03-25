@@ -15,21 +15,6 @@ const ACTION_ERROR = 'ERROR';
 // Size of the image expected by mobilenet.
 const IMAGE_SIZE = 224;
 
-// Feedback logging mechanism
-function logImageDetails() {
-    const selectedImage = window.getSelection().anchorNode;
-    if (selectedImage && selectedImage.tagName === 'IMG') {
-        const url = selectedImage.src;
-        const altText = selectedImage.alt;
-        const textContent = 'good';
-        console.log(`URL: ${url}, Alt Text: ${altText}, Text Content: ${textContent}`);
-    } else {
-        console.log('No image selected or not an image element.');
-    }
-}
-logImageDetails();
-
-
 // logs messages
 function log(message) {
     console.log(message);
@@ -141,9 +126,10 @@ const observeDOMChanges = () => {
 
 // Add event listeners to all images currently in the DOM
 const initialize = () => {
-    log("Chrome plugin initialized")
+    log("Initializing Chrome plugin");
     document.querySelectorAll('img').forEach(addLoadListenerToImage);
     observeDOMChanges();
+    log("Chrome plugin initialized");
 };
 
 // Execute the initialization function
