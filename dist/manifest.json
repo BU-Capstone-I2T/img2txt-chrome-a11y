@@ -9,7 +9,11 @@
   },
   "permissions": [
     "storage",
-    "scripting"
+    "tabs",
+    "activeTab",
+    "nativeMessaging",
+    "scripting",
+    "contextMenus"
   ],
   "icons": {
     "32": "images/icon32.png",
@@ -22,10 +26,16 @@
   "background": {
     "service_worker": "src/background.js"
   },
+  "commands": {
+    "feedback1": {
+      "suggested_key": {"default": "Ctrl+Shift+1", "mac": "Command+Shift+1"},
+      "description": "do something"
+    }
+  },
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["src/content.js"],
+      "js": ["src/content.js", "popup/I2T.js"],
       "all_frames": true,
       "run_at": "document_end"
     }
