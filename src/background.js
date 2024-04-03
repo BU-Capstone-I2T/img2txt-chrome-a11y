@@ -17,8 +17,6 @@ const ACTION_ERROR = 'ERROR';
 const SERVER_URL = 'https://i2tcapstone.azurewebsites.net';
 const SERVER_LOGIN_PATH = "/users/login"
 const SERVER_LOG = "/logs"
-const SERVER_FEEDBACK = '/i2t/feedback'
-const ACTION_FEEDBACK1 = 'feedback1'
 let resolveToken = () => {};
 const TOKEN = new Promise((resolve) => resolveToken = resolve);
 
@@ -35,40 +33,6 @@ function getToken() {
         }
     })
 }
-
-// Temporary alt text measure
-function clickMenuCallback(info, tab) {
-    const message = { action: 'IMAGE_CLICKED', url: info.srcUrl };
-    chrome.tabs.sendMessage(tab.id, message);
-}
-
-
-// Temporary alt text display until I figure out the key binds
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.contextMenus.create({
-        id: 'contextMenu0',
-        title: 'Show alt text ',
-        contexts: ['image'],
-    });
-});
-
-chrome.contextMenus.onClicked.addListener(clickMenuCallback);
-
-// Listen for key bindings
-chrome.commands.onCommand.addListener((command) => {
-    if (command === ACTION_FEEDBACK1) {
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                chrome.tabs.sendMessage(tabs[0].id, {action: "captureImage"}).then(r => {
-                    console.log(r)
-                    if (r.imageUrl != null) {
-                        console.log(r.imageUrl)
-                        feedback('1', r.imageUrl)
-                    }
-                    console.log(r.imageUrl)
-                });
-        });
-    }
-});
 
 // Listen for login button
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -129,34 +93,6 @@ function login(user, pass) {
         .catch(err => console.error(err));
 }
 
-// logs feedback
-function feedback(msg, link) {
-    console.log(msg + " : " + link);
-    getToken().then(async token => {
-        const logMessage = {
-            score: msg,
-            hashed_page_url: await crypto.subtle.digest('MD5', link),
-            timestamp: new Date,
-            image_url: link
-    }
-
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                logs: [logMessage],
-                count: 1
-            })
-        };
-
-        fetch(`${SERVER_URL}${SERVER_FEEDBACK}`, options)
-            .catch(err => console.error(err));
-    })
-}
-
 function log(msg) {
     console.log(msg);
     getToken().then(token => {
@@ -187,7 +123,7 @@ function log(msg) {
 
 // Error logging function
 function logError(msg, sta) {
-    console.error(msg);
+    console.error(msg, sta);
     getToken().then(token => {
         const stack = sta ?? new Error().stack;
         const logMessage = {

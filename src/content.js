@@ -15,72 +15,6 @@ const ACTION_ERROR = 'ERROR';
 // Size of the image expected by mobilenet.
 const IMAGE_SIZE = 224;
 
-// Gets the currently selected image when a key bind is pressed
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "captureImage") {
-        chrome.tabs.executeScript({
-            code: `
-                document.addEventListener('click', function(event) {
-                    if (event.target.tagName.toLowerCase() === 'img') {
-                        const imgSrc = event.target.src;
-                        chrome.runtime.sendMessage({imageUrl: imgSrc});
-                    }
-                });
-            `
-        });
-    }
-});
-
-// Debug alt text box
-function addTextElementToImageNode(imgNode, textContent) {
-    const originalParent = imgNode.parentElement;
-    const container = document.createElement('div');
-    container.style.position = 'relative';
-    container.style.textAlign = 'center';
-    container.style.color = 'white';
-    const text = document.createElement('div');
-    text.className = 'tfjs_mobilenet_extension_text';
-    text.style.position = 'absolute';
-    text.style.top = '50%';
-    text.style.left = '50%';
-    text.style.transform = 'translate(-50%, -50%)';
-    text.style.fontSize = '34px';
-    text.style.fontFamily = 'Google Sans,sans-serif';
-    text.style.fontWeight = '700';
-    text.style.color = 'white';
-    text.style.lineHeight = '1em';
-    text.style['-webkit-text-fill-color'] = 'white';
-    text.style['-webkit-text-stroke-width'] = '1px';
-    text.style['-webkit-text-stroke-color'] = 'black';
-    // Add the containerNode as a peer to the image, right next to the image.
-    originalParent.insertBefore(container, imgNode);
-    // Move the imageNode to inside the containerNode;
-    container.appendChild(imgNode);
-    // Add the text node right after the image node;
-    container.appendChild(text);
-    text.textContent = textContent;
-}
-
-// Finds the correct image given the source url
-function getImageElementsWithSrcUrl(srcUrl) {
-    const imgElArr = Array.from(document.getElementsByTagName('img'));
-    return imgElArr.filter(x => x.src === srcUrl);
-}
-
-// Temporary alt text measure
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (!message) {
-        return;
-    }
-    if (message.action === 'IMAGE_CLICKED') {
-        // Get the list of images with this srcUrl.
-        const imgElements =  getImageElementsWithSrcUrl(message.url);
-        for (const imgNode of imgElements) {
-            addTextElementToImageNode(imgNode, imgNode.alt);
-        }
-    }
-});
-
 // logs messages
 function log(message) {
     console.log(message);
@@ -93,6 +27,7 @@ function logError(message) {
     const sta = new Error().stack;
     chrome.runtime.sendMessage({name: ACTION_ERROR, msg: message, stack: sta})
 }
+
 
 // This function will be executed on each image once it is loaded
 const sendImageToServiceWorker = (img, drawableImg) => {
