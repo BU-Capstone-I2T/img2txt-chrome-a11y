@@ -9,8 +9,11 @@
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as tf from '@tensorflow/tfjs';
 
-// Size of the image expected by mobilenet.
-const IMAGE_SIZE = 224;
+import { getToken } from './auth';
+import Logger from './log';
+import { IMAGE_SIZE } from './constants';
+
+const log = new Logger('i2t-model-xs', getToken);
 
 // How many predictions to take.
 const TOPK_PREDICTIONS = 2;
@@ -32,7 +35,7 @@ export class ImageClassifier {
      * Loads mobilenet from URL and keeps a reference to it in the object.
      */
     async loadModel() {
-        console.log('Loading model...');
+        log.info('Loading model...');
         const startTime = performance.now();
         try {
             this.model = await mobilenet.load({ version: 2, alpha: 1.00 });
@@ -42,9 +45,9 @@ export class ImageClassifier {
                 this.model.classify(tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3]));
             });
             const totalTime = Math.floor(performance.now() - startTime);
-            console.log(`Model loaded and initialized in ${totalTime} ms...`);
+            log.info(`Model loaded and initialized in ${totalTime} ms...`);
         } catch (e) {
-            console.error('Unable to load model', e);
+            log.debug('Unable to load model', e);
         }
     }
 
@@ -59,16 +62,16 @@ export class ImageClassifier {
      */
     async analyzeImage(imageData, url) {
         if (!this.model) {
-            console.log('Waiting for model to load...');
+            log.warn('Waiting for model to load...');
             setTimeout(
                 () => { this.analyzeImage(imageData, url) }, FIVE_SECONDS_IN_MS);
             return;
         }
-        console.log(`Predicting... ${url}`);
+        log.debug(`Predicting... ${url}`);
         const startTime = performance.now();
         const predictions = await this.model.classify(imageData, TOPK_PREDICTIONS);
         const totalTime = performance.now() - startTime;
-        console.log(`Done in ${totalTime.toFixed(1)} ms `);
+        log.benchmark(`Predicted image class in ${totalTime.toFixed(1)} ms `);
         return predictions;
     }
 }
