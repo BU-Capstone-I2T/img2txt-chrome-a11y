@@ -7,59 +7,38 @@
  * https://developer.chrome.com/docs/extensions/mv3/background_pages/
  */
 
-import I2TModelXS from './i2t-model-xs.js';
+import I2TModelXS from './i2t-model-xs';
+import { getToken } from './auth';
+import Logger from './log';
+import { ACTION_DESCRIBE_IMAGE, ACTION_LOGIN, ACTION_LOG, SERVER_URL, SERVER_LOGIN_PATH } from './constants';
 
-// Constants
-const ACTION_DESCRIBE_IMAGE = 'DESCRIBE_IMAGE';
-const ACTION_LOGIN = 'LOGIN';
-const ACTION_LOG = 'LOG';
-const ACTION_ERROR = 'ERROR';
-const SERVER_URL = 'https://i2tcapstone.azurewebsites.net';
-const SERVER_LOGIN_PATH = "/users/login"
-const SERVER_LOG = "/logs"
-let resolveToken = () => {};
-const TOKEN = new Promise((resolve) => resolveToken = resolve);
+const log = new Logger('background.js', getToken);
+const contentScriptLog = new Logger('content.js', getToken);
 
 // Load the i2t model
 const model = new I2TModelXS();
-
-// Gets access token from storage
-function getToken() {
-    return chrome.storage.sync.get("token").then((response) => {
-        if (response.value) {
-            return response.value;
-        } else {
-            return TOKEN;
-        }
-    })
-}
 
 // Listen for login button
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.name === ACTION_LOGIN) {
         // Acquire access token
         login(message.username, message.password);
-    } else if (message.name === ACTION_LOG) {
-        // Logs message
-        log(message.msg);
-        return false; // Indicate synchronous response
-    } else if (message.name === ACTION_ERROR) {
-        // Error logs
-        logError(message.msg, message.stack);
-        return false; // Indicate synchronous response
     } else if (message.action === ACTION_DESCRIBE_IMAGE) {
         describe(message, sendResponse);
+    } else if (message.action === ACTION_LOG) {
+        contentScriptLog.sendLog(message.message, message.level);
+        return false; // Indicate synchronous response
     }
     return true; // Indicate asynchronous response
 })
 
-// request i2t model to describe
+// Request i2t model to describe
 function describe(message, sendResponse) {
     if (!message.height || !message.width || !message.rawImageData) {
-        logError("Invalid image data");
+        log.error("Invalid image data");
         return;
     }
-    log(`Received image to describe: ${message.url}`)
+    log.debug(`Received image to describe: ${message.url}`)
 
     // Convert raw image data to ImageData
     const imageData = new ImageData(
@@ -69,12 +48,12 @@ function describe(message, sendResponse) {
     model.describeImage(imageData, message.url).then((desription) => {
         sendResponse({ description: desription });
     }).catch((err) => {
-        logError(err);
+        log.error(err);
         sendResponse({ description: "An error occurred while describing the image." });
     });
 }
 
-// Gets access token
+// Get and set access token
 function login(user, pass) {
     const options = {
         method: 'POST',
@@ -87,70 +66,10 @@ function login(user, pass) {
     fetch(`${SERVER_URL}${SERVER_LOGIN_PATH}`, options)
         .then(response => response.json())
         .then(response => {
-            resolveToken(response.access_token);
-            chrome.storage.sync.set({token: {value: response.access_token}});
+            chrome.storage.sync.set({token: response.access_token});
         })
         .catch(err => console.error(err));
 }
-
-function log(msg) {
-    console.log(msg);
-    getToken().then(token => {
-        const logMessage = {
-            message: msg,
-            level: {label: "info", value: 2},
-            logger: "client",
-            timestamp: new Date().toISOString(),
-            stacktrace: ""
-        }
-
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                logs: [logMessage],
-                count: 1
-            })
-        };
-
-        fetch(`${SERVER_URL}${SERVER_LOG}`, options)
-            .catch(err => console.error(err));
-    })
-}
-
-// Error logging function
-function logError(msg, sta) {
-    console.error(msg, sta);
-    getToken().then(token => {
-        const stack = sta ?? new Error().stack;
-        const logMessage = {
-            message: msg,
-            level: {label: "error", value: 4},
-            logger: "client",
-            timestamp: new Date().toISOString(),
-            stacktrace: stack
-        }
-
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                logs: [logMessage],
-                count: 1
-            })
-        };
-
-        fetch(`${SERVER_URL}${SERVER_LOG}`, options)
-            .catch(err => console.error(err));
-    })
-}
-
 
 const logSystemInfo = async () => {
     let systemInfo = {};
@@ -173,7 +92,7 @@ const logSystemInfo = async () => {
 
     await Promise.all([cpuInfoPromise, memoryInfoPromise]);
 
-    log(`"systeminfo": ${JSON.stringify(systemInfo, null, 2)}`);
+    log.benchmark(`"systeminfo": ${JSON.stringify(systemInfo, null, 2)}`);
 }
 
 // Send system info to server
@@ -183,6 +102,6 @@ logSystemInfo();
 setInterval(() => {
     chrome.system.memory.getInfo((info) => {
         const availableMemoryMB = info.availableCapacity / 1024 / 1024;
-        log(`Available Memory: ${availableMemoryMB.toFixed(2)} MB`);
+        log.benchmark(`Available Memory: ${availableMemoryMB.toFixed(2)} MB`);
     });
 }, 10000);
