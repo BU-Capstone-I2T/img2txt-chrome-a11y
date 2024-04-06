@@ -70,3 +70,39 @@ function login(user, pass) {
         })
         .catch(err => console.error(err));
 }
+
+const logSystemInfo = async () => {
+    let systemInfo = {};
+
+    const cpuInfoPromise = new Promise((resolve) => {
+        chrome.system.cpu.getInfo((info) => {
+            systemInfo.cpuArch = info.archName;
+            systemInfo.cpuModel = info.modelName;
+            systemInfo.cpuNumOfProcessors = info.numOfProcessors;
+            resolve();
+        });
+    });
+
+    const memoryInfoPromise = new Promise((resolve) => {
+        chrome.system.memory.getInfo((info) => {
+            systemInfo.memoryCapacityGB = info.capacity / 1024 / 1024 / 1024;
+            resolve();
+        });
+    });
+
+    await Promise.all([cpuInfoPromise, memoryInfoPromise]);
+
+    log.benchmark(`"systeminfo": ${JSON.stringify(systemInfo, null, 2)}`);
+}
+
+// Send system info to server
+logSystemInfo();
+
+// Log memory usage every 10 seconds
+setInterval(() => {
+    chrome.system.memory.getInfo((info) => {
+        const availableMemoryMB = info.availableCapacity / 1024 / 1024;
+        log.benchmark(`Available Memory: ${availableMemoryMB.toFixed(2)} MB`);
+    });
+}, 10000);
+
