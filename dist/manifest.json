@@ -32,5 +32,6 @@
       "run_at": "document_end"
     }
   ],
+  "options_page": "options/options.html",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlpCfVboT8iPsycrN7Zf+POu/iJTxeo7KDJ2e0JsJlueJ6yNYfK46VVhGy3YW/VuJz2Rr78ejn6dtgzbtvOS38HJPp3IYPxvkYSOVhUiNvF/xbGVywzu7eeLj66UT2r+AL4VWBHDp/QhXDSChX3UIj9tMNiC0naDEL3izs3YwNx7ZqHiMom8b6j8x4DDvBbHO11SdnvFJ66uuT8H7e2tY69Oq47AY967Px8nTbYqkDuVPjNdyRQo7tHNI+nTNR3uxAP343qW0rYawGGFFnvatnOOCeWsOgV+kYDr7xdNlq3eyxAO6vvy4eIjFryWdT2X+MJw09MdqW1GqaVmbMNE4EQIDAQAB"
 }

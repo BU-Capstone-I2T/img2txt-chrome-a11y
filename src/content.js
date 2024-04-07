@@ -7,8 +7,10 @@
  * https://developer.chrome.com/docs/extensions/mv3/content_scripts/
  */
 
-import { ACTION_DESCRIBE_IMAGE, ACTION_LOG, IMAGE_SIZE } from "./constants";
+import { ACTION_DESCRIBE_IMAGE, ACTION_LOG, IMAGE_SIZE, DEFAULT_LOGGING_ENABLED } from "./constants";
 import { LogLevels } from "./log";
+
+let loggingEnabled = DEFAULT_LOGGING_ENABLED;
 
 /**
  * Send a log message to the background script, and log it to the console.
@@ -17,6 +19,7 @@ import { LogLevels } from "./log";
  * @param {object} loglevel the level of the log
  */
 const log = (msg, loglevel) => {
+    if (!loggingEnabled) return;
     if (loglevel === LogLevels.BENCHMARK) console.log(`[BENCHMARK]: ${msg}`);
     if (loglevel === LogLevels.ERROR) console.error(msg);
     if (loglevel === LogLevels.WARN) console.warn(msg);
@@ -123,6 +126,32 @@ const observeDOMChanges = () => {
     observer.observe(document.body, config);
 };
 
+// Listen for changes to extension settings
+chrome.storage.sync.onChanged.addListener((changes) => {
+    if (changes.logging) {
+        loggingEnabled = changes.logging.newValue;
+    }
+    if (changes.altText) {
+        // TODO
+    }
+});
+
+// Get the initial settings
+const loadInitialSettings = () => {
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get(['logging', 'altText'], (result) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else {
+                loggingEnabled = result.logging;
+                if (loggingEnabled === undefined) {
+                    loggingEnabled = DEFAULT_LOGGING_ENABLED;
+                }
+                resolve();
+            }
+        });
+    });
+};
 
 // Add event listeners to all images currently in the DOM
 const initialize = () => {
@@ -133,4 +162,6 @@ const initialize = () => {
 };
 
 // Execute the initialization function
-initialize();
+loadInitialSettings().then(initialize).catch((err) => {
+    console.log(err);
+});

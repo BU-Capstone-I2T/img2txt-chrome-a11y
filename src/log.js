@@ -10,7 +10,33 @@
  *   - timestamp: the timestamp of the log message
  *   - stacktrace: the stack trace of the log message (optional)
  */
-import { SERVER_URL, SERVER_LOG } from './constants';
+import { SERVER_URL, SERVER_LOG, DEFAULT_LOGGING_ENABLED } from './constants';
+
+let loggingEnabled = DEFAULT_LOGGING_ENABLED;
+
+/**
+ * Load whether logging is enabled from the extension settings
+ *
+ * @returns {Promise} a promise that resolves when the logging state is loaded
+ */
+export const loadLoggingState = () => {
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get(['logging'], (result) => {
+            if (result.logging === undefined) {
+                result.logging = DEFAULT_LOGGING_ENABLED;
+            }
+            loggingEnabled = result.logging;
+            resolve();
+        });
+    });
+};
+
+// Listen for changes to extension settings
+chrome.storage.sync.onChanged.addListener((changes) => {
+    if (changes.logging) {
+        loggingEnabled = changes.logging.newValue;
+    }
+});
 
 /**
  * Log levels for the logger
@@ -51,6 +77,9 @@ export default class Logger {
      * @param {string} sta          the stack trace
      */
     sendLog(msg, level, sta = '') {
+        if (!loggingEnabled) {
+            return;
+        }
         this.getToken().then(token => {
             console.log(JSON.stringify(token));
             const logMessage = {
@@ -79,27 +108,42 @@ export default class Logger {
     }
 
     debug(msg) {
+        if (!loggingEnabled) {
+            return;
+        }
         console.debug(msg);
         this.sendLog(msg, LogLevels.DEBUG);
     }
 
     info(msg) {
+        if (!loggingEnabled) {
+            return;
+        }
         console.log(msg);
         this.sendLog(msg, LogLevels.INFO);
     }
 
     warn(msg) {
+        if (!loggingEnabled) {
+            return;
+        }
         console.warn(msg);
         this.sendLog(msg, LogLevels.WARN);
     }
 
     error(msg, sta) {
+        if (!loggingEnabled) {
+            return;
+        }
         const stack = sta ?? new Error().stack;
         console.error(msg, stack);
         this.sendLog(msg, LogLevels.ERROR, stack);
     }
 
     benchmark(msg) {
+        if (!loggingEnabled) {
+            return;
+        }
         if (this.benchmarkEnabled) {
             console.log(msg);
             this.sendLog(msg, LogLevels.BENCHMARK);

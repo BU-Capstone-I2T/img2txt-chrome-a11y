@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Generates image descriptions for use with screen readers",
   "scripts": {
-    "copy": "mkdir -p dist/src && cp -r popup dist/",
+    "copy": "mkdir -p dist/src && cp -r popup dist/ && cp -r options dist",
     "build": "parcel build src/background.js src/content.js --no-cache --no-optimize --dist-dir dist/src/ && npm run copy",
     "watch": "npm run copy && parcel watch src/background.js --dist-dir dist/src/",
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js"

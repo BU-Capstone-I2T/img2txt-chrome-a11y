@@ -10,12 +10,14 @@
 import I2TModelXS from './i2t-model-xs';
 import { getToken } from './auth';
 import Logger from './log';
-import { ACTION_DESCRIBE_IMAGE, ACTION_LOGIN, ACTION_LOG, SERVER_URL, SERVER_LOGIN_PATH } from './constants';
+import { loadLoggingState } from './log';
+import {
+    ACTION_DESCRIBE_IMAGE, ACTION_LOGIN, ACTION_LOG,
+    SERVER_URL, SERVER_LOGIN_PATH
+} from './constants';
 
 const log = new Logger('background.js', getToken);
 const contentScriptLog = new Logger('content.js', getToken);
-
-// Load the i2t model
 const model = new I2TModelXS();
 
 // Listen for login button
@@ -33,7 +35,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 })
 
 // Request i2t model to describe
-function describe(message, sendResponse) {
+const describe = (message, sendResponse) => {
     if (!message.height || !message.width || !message.rawImageData) {
         log.error("Invalid image data");
         return;
@@ -54,7 +56,7 @@ function describe(message, sendResponse) {
 }
 
 // Get and set access token
-function login(user, pass) {
+const login = (user, pass) => {
     const options = {
         method: 'POST',
         headers: {
@@ -95,14 +97,25 @@ const logSystemInfo = async () => {
     log.benchmark(`"systeminfo": ${JSON.stringify(systemInfo, null, 2)}`);
 }
 
-// Send system info to server
-logSystemInfo();
+const loadInitialSettings = () => {
+    return loadLoggingState();
+}
 
-// Log memory usage every 10 seconds
-setInterval(() => {
-    chrome.system.memory.getInfo((info) => {
-        const availableMemoryMB = info.availableCapacity / 1024 / 1024;
-        log.benchmark(`Available Memory: ${availableMemoryMB.toFixed(2)} MB`);
-    });
-}, 10000);
+const initialize = () => {
+    // Send system info to server
+    logSystemInfo();
 
+    // Log memory usage every 10 seconds
+    setInterval(() => {
+        chrome.system.memory.getInfo((info) => {
+            const availableMemoryMB = info.availableCapacity / 1024 / 1024;
+            log.benchmark(`Available Memory: ${availableMemoryMB.toFixed(2)} MB`);
+        });
+    }, 10000);
+
+    // Load the i2t model
+    model.load();
+}
+
+// Execute the initialization function
+loadInitialSettings().then(initialize);

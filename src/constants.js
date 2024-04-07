@@ -12,3 +12,4 @@ export const SERVER_URL = 'https://i2tcapstone.azurewebsites.net';
 export const SERVER_LOGIN_PATH = "/users/login"
 export const SERVER_LOG = "/logs"
 export const IMAGE_SIZE = 224; // Image size expected by the i2t model
+export const DEFAULT_LOGGING_ENABLED = true;

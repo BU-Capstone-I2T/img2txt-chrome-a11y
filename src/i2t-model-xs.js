@@ -159,9 +159,9 @@ export class NLPModel {
 
 export default class I2TModelXS {
     /**
-     * Loads and initializes the image image-to-text model.
+     * Loads the image-to-text model.
      */
-    constructor() {
+    load() {
         this.imageClassifier = new ImageClassifier();
         this.nlpModel = new NLPModel();
     }
@@ -177,4 +177,5 @@ export default class I2TModelXS {
             this.nlpModel.textContentFromPrediction(predictions)
         );
     }
+
 }
