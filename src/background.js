@@ -8,6 +8,7 @@
  */
 
 import I2TModelXS from './i2t-model-xs';
+import I2TModelL from './i2t-model-large';
 import { getToken } from './auth';
 import Logger from './log';
 import { loadLoggingState } from './log';
@@ -18,7 +19,9 @@ import {
 
 const log = new Logger('background.js', getToken);
 const contentScriptLog = new Logger('content.js', getToken);
-const model = new I2TModelXS();
+// TODO: switch between models based on user settings, and set recommended setting based on system info
+// const model = new I2TModelXS();
+const model = new I2TModelL();
 
 // Listen for login button
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

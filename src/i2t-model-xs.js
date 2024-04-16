@@ -47,7 +47,7 @@ export class ImageClassifier {
             const totalTime = Math.floor(performance.now() - startTime);
             log.info(`Model loaded and initialized in ${totalTime} ms...`);
         } catch (e) {
-            log.debug('Unable to load model', e);
+            log.error('Unable to load model', e);
         }
     }
 
@@ -63,9 +63,15 @@ export class ImageClassifier {
     async analyzeImage(imageData, url) {
         if (!this.model) {
             log.warn('Waiting for model to load...');
-            setTimeout(
-                () => { this.analyzeImage(imageData, url) }, FIVE_SECONDS_IN_MS);
-            return;
+            // wait for the model to load
+            await new Promise((resolve) => {
+                const interval = setInterval(() => {
+                    if (this.loaded) {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, 1000);
+            });
         }
         log.debug(`Predicting... ${url}`);
         const startTime = performance.now();
