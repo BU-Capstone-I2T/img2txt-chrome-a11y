@@ -220,5 +220,5 @@ const initialize = () => {
 
 // Execute the initialization function
 loadInitialSettings().then(initialize).catch((err) => {
-    console.log(err);
+    console.error(err);
 });

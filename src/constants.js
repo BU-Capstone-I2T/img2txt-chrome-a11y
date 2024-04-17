@@ -14,4 +14,5 @@ export const SERVER_LOG = "/logs"
 export const IMAGE_SIZE = 224; // Image size expected by the i2t model
 export const DEFAULT_LOGGING_ENABLED = true;
 export const DEFAULT_ALT_TEXT_DISPLAY_DISABLED = false;
+export const DEFAULT_MODEL_SIZE = 'xs';
 export const DEBUG_DIV_NAME = 'alt_text_display_box';

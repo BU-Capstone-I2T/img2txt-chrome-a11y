@@ -14,14 +14,14 @@ import Logger from './log';
 import { loadLoggingState } from './log';
 import {
     ACTION_DESCRIBE_IMAGE, ACTION_LOGIN, ACTION_LOG,
-    SERVER_URL, SERVER_LOGIN_PATH
+    SERVER_URL, SERVER_LOGIN_PATH,
+    DEFAULT_MODEL_SIZE
 } from './constants';
 
 const log = new Logger('background.js', getToken);
 const contentScriptLog = new Logger('content.js', getToken);
-// TODO: switch between models based on user settings, and set recommended setting based on system info
-// const model = new I2TModelXS();
-const model = new I2TModelL();
+
+let model = null;
 
 // Listen for login button
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -43,6 +43,10 @@ const describe = (message, sendResponse) => {
         log.error("Invalid image data");
         return;
     }
+    if (!model) {
+        log.error("I2T model not yet loaded");
+        return;
+    }
     log.debug(`Received image to describe: ${message.url}`)
 
     // Convert raw image data to ImageData
@@ -50,8 +54,8 @@ const describe = (message, sendResponse) => {
         Uint8ClampedArray.from(message.rawImageData), message.width, message.height);
 
     // Request the i2t model to describe the image
-    model.describeImage(imageData, message.url).then((desription) => {
-        sendResponse({ description: desription });
+    model.describeImage(imageData, message.url).then((description) => {
+        sendResponse({ description: description });
     }).catch((err) => {
         log.error(err);
         sendResponse({ description: "An error occurred while describing the image." });
@@ -100,25 +104,51 @@ const logSystemInfo = async () => {
     log.benchmark(`"systeminfo": ${JSON.stringify(systemInfo, null, 2)}`);
 }
 
-const loadInitialSettings = () => {
-    return loadLoggingState();
-}
-
-const initialize = () => {
-    // Send system info to server
-    logSystemInfo();
-
-    // Log memory usage every 10 seconds
-    setInterval(() => {
-        chrome.system.memory.getInfo((info) => {
-            const availableMemoryMB = info.availableCapacity / 1024 / 1024;
-            log.benchmark(`Available Memory: ${availableMemoryMB.toFixed(2)} MB`);
-        });
-    }, 10000);
-
-    // Load the i2t model
+// Helper function to set the model size
+const setModel = (size) => {
+    if (size === 'xs') {
+        model = new I2TModelXS();
+    } else if (size === 'l') {
+        model = new I2TModelL();
+    }
     model.load();
 }
 
-// Execute the initialization function
-loadInitialSettings().then(initialize);
+// Listen for changes to extension settings
+chrome.storage.sync.onChanged.addListener((changes) => {
+    if (changes.modelSize) {
+        setModel(changes.modelSize.newValue);
+    }
+});
+
+const loadInitialSettings = () => {
+    const loadI2TSettings = new Promise((resolve, reject) => {
+        chrome.storage.sync.get(['modelSize'], (result) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else {
+                let modelSize = result.modelSize;
+                if (result.modelSize === undefined) {
+                    modelSize = DEFAULT_MODEL_SIZE;
+                }
+                setModel(modelSize);
+                resolve();
+            }
+        });
+    })
+    return Promise.all([loadI2TSettings, loadLoggingState()]);
+}
+
+// Send system info to server
+logSystemInfo();
+
+// Log memory usage every 10 seconds
+setInterval(() => {
+    chrome.system.memory.getInfo((info) => {
+        const availableMemoryMB = info.availableCapacity / 1024 / 1024;
+        log.benchmark(`Available Memory: ${availableMemoryMB.toFixed(2)} MB`);
+    });
+}, 10000);
+
+// Load initial settings
+loadInitialSettings();
