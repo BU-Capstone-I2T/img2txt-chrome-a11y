@@ -10,24 +10,3 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     })
 })
-
-// key bind shift + x + z for image feedback
-/*
-chrome.action.onClicked.addListener((tab) => {
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['contentScript.js']
-    });
-});
-
-chrome.commands.onCommand.addListener((command) => {
-    if (command === '_execute_browser_action') {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                files: ['contentScript.js']
-            });
-        });
-    }
-});
- */
