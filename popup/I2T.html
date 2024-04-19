@@ -1,16 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Image To Text Login</title>
-    </head>
-    <body>
-    <label for='username'>
-    </label><input type='text' id='username' placeholder='Username'>
-    <br>
-    <label for='password'></label>
-    <input type='password' id='password' placeholder='Password'>
-    <br>
-    <input type='button' id='loginButton' value='Login'>
+
+<head>
+    <title>Alt Text AI</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        h1 {
+            color: #000;
+        }
+
+        p {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #000;
+        }
+
+        input[type='text'],
+        input[type='password'],
+        input[type='button'] {
+            width: 95%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type='button'] {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        input[type='button']:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Alt Text AI Login</h1>
+    <p>Login is optional and only necessary for sending logs to our server for quality service improvements.</p>
+    <p>To get an account, please contact the developers at <a href="mailto:img2text.capstone@gmail.com">img2text.capstone@gmail.com</a>.</p>
+
+    <form>
+        <label for='username'>Username:</label>
+        <input type='text' id='username' name='username' placeholder='Enter your username'>
+        <br>
+        <label for='password'>Password:</label>
+        <input type='password' id='password' name='password' placeholder='Enter your password'>
+        <br>
+        <input type='button' id='loginButton' value='Login' aria-label='Log in to your account'>
+    </form>
+
     <script src='/popup/I2T.js'></script>
-    </body>
+</body>
 </html>
