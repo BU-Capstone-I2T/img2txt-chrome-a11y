@@ -44,7 +44,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * Request the i2t model to describe the image, and send the description back to the content script.
  *
  * @param {Object} message message from content script containing image data
- * @param {Function} sendResponse function to send response back to content script
+ * @param {Function} sendResponse function to send response back to content script.
+ *                                To learn more about the sendResponse function, see:
+ *                                https://developer.chrome.com/docs/extensions/develop/concepts/messaging#simple
  */
 const describe = (message, sendResponse) => {
     // Check if the message contains the necessary image data
