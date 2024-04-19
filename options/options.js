@@ -21,8 +21,7 @@ const modelSizeToPriorityMap = {
  *
  * @param {string} priority
  * @returns {string} The model size corresponding to the given priority.
- *  *                Returns 'undefined' if the priority is not implemented.
-
+ *                   Returns 'undefined' if the priority is not implemented.
  */
 const priorityToModelSize = (priority) => {
     const modelSize = priorityToModelSizeMap[priority];
