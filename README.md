@@ -13,6 +13,7 @@ This project uses the following technologies:
 - [Chrome Extensions](https://developer.chrome.com/docs/extensions/mv3/)
 - [Node.js](https://nodejs.org/en/)
 - [TensorFlow.js](https://www.tensorflow.org/js)
+- [EditorConfig](https://editorconfig.org/) (for consistent coding styles, install the Editorconfig plugin for your IDE)
 
 ## Installation
 
