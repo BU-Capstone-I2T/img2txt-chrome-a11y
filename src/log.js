@@ -73,7 +73,7 @@ export default class Logger {
      * Sends a log to the server
      *
      * @param {string} msg          the message to log
-     * @param {object} level        the level of the log
+     * @param {Object} level        the level of the log
      * @param {string} sta          the stack trace
      */
     sendLog(msg, level, sta = '') {

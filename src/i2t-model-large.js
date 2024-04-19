@@ -14,7 +14,7 @@ const log = new Logger('i2t-model-large', getToken);
  * Preprocess the image to be compatible with the model
  * The inputs pixel values are scaled between -1 and 1, sample-wise.
  *
- * @param {ImageData} image
+ * @param {ImageData} image Image to preprocess
  * @returns {tf.Tensor} Preprocessed image tensor (shape: [1, 299, 299, 3])
  */
 const preprocess_img = (image) => {
@@ -32,7 +32,7 @@ const preprocess_img = (image) => {
  * Get the encoded vector of the image
  *
  * @param {tf.Tensor} image (shape: [1, 299, 299, 3])
- * @param {*} model
+ * @param {*} model Image feature extractor model to use for prediction
  * @returns {tf.Tensor} Encoded vector of the image (shape: [1, 2048])
  */
 const encode = (image, model) => {
@@ -41,6 +41,16 @@ const encode = (image, model) => {
     return vec;
 }
 
+/**
+ * Greedy search to generate a caption for the image
+ *
+ * @param {tf.Tensor} img_e Encoded vector-representation of the image
+ * @param {*} model Image feature to image caption model to use for prediction
+ * @param {Object} wordtoix Mapping of word to index
+ * @param {Object} ixtoword Mapping of index to word
+ * @param {number} max_length Maximum length of the caption (default: 74)
+ * @returns {string} Description of the image
+ */
 const greedy_search = (img_e, model, wordtoix, ixtoword, max_length = 74) => {
     let start = 'startseq';
     for (let i = 0; i < max_length; i++) {
@@ -97,8 +107,8 @@ export default class I2TModelL {
     /**
      * Describes the image using the model.
      *
-     * @param {ImageData} imageData
-     * @param {string} url
+     * @param {ImageData} imageData The image to describe.
+     * @param {string} url The URL of the image.
      *
      * @returns {string} The description of the image.
      */

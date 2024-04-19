@@ -1,7 +1,7 @@
 /**
  * File Description:
  * This file contains the background script for the extension. It listens for messages
- * from the content script and sends the image URL to the server to be described.
+ * from the content script and popup page, and sends the image to the image to text (I2T) model.
  *
  * See the Chrome extension documentation for more information:
  * https://developer.chrome.com/docs/extensions/mv3/background_pages/
@@ -21,28 +21,39 @@ import {
 const log = new Logger('background.js', getToken);
 const contentScriptLog = new Logger('content.js', getToken);
 
+// The selected I2T model
 let model = null;
 
-// Listen for login button
+// Listen for messages from the content script and popup page
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.name === ACTION_LOGIN) {
-        // Acquire access token
+        // Acquire access token using login credentials from popup
         login(message.username, message.password);
     } else if (message.action === ACTION_DESCRIBE_IMAGE) {
+        // Describe image received from content script
         describe(message, sendResponse);
     } else if (message.action === ACTION_LOG) {
+        // Log message from content script
         contentScriptLog.sendLog(message.message, message.level);
         return false; // Indicate synchronous response
     }
     return true; // Indicate asynchronous response
 })
 
-// Request i2t model to describe
+/**
+ * Request the i2t model to describe the image, and send the description back to the content script.
+ *
+ * @param {Object} message message from content script containing image data
+ * @param {Function} sendResponse function to send response back to content script
+ */
 const describe = (message, sendResponse) => {
+    // Check if the message contains the necessary image data
     if (!message.height || !message.width || !message.rawImageData) {
         log.error("Invalid image data");
         return;
     }
+
+    // Check if the model is loaded
     if (!model) {
         log.error("I2T model not yet loaded");
         return;
@@ -62,7 +73,12 @@ const describe = (message, sendResponse) => {
     });
 }
 
-// Get and set access token
+/**
+ * Function to log in to the server.
+ *
+ * @param {string} user username
+ * @param {string} pass password
+ */
 const login = (user, pass) => {
     const options = {
         method: 'POST',
@@ -80,9 +96,13 @@ const login = (user, pass) => {
         .catch(err => console.error(err));
 }
 
+/**
+ * Function to log system information.
+ */
 const logSystemInfo = async () => {
     let systemInfo = {};
 
+    // Promise to get system information
     const cpuInfoPromise = new Promise((resolve) => {
         chrome.system.cpu.getInfo((info) => {
             systemInfo.cpuArch = info.archName;
@@ -92,6 +112,7 @@ const logSystemInfo = async () => {
         });
     });
 
+    // Promise to get total memory capacity
     const memoryInfoPromise = new Promise((resolve) => {
         chrome.system.memory.getInfo((info) => {
             systemInfo.memoryCapacityGB = info.capacity / 1024 / 1024 / 1024;
@@ -99,12 +120,17 @@ const logSystemInfo = async () => {
         });
     });
 
+    // Wait for both promises to resolve
     await Promise.all([cpuInfoPromise, memoryInfoPromise]);
 
     log.benchmark(`"systeminfo": ${JSON.stringify(systemInfo, null, 2)}`);
 }
 
-// Helper function to set the model size
+/**
+ * Helper function to set the I2T model size.
+ *
+ * @param {string} size The size of the I2T model to set ('xs', 'l', ...)
+ */
 const setModel = (size) => {
     if (size === 'xs') {
         model = new I2TModelXS();
@@ -114,13 +140,11 @@ const setModel = (size) => {
     model.load();
 }
 
-// Listen for changes to extension settings
-chrome.storage.sync.onChanged.addListener((changes) => {
-    if (changes.modelSize) {
-        setModel(changes.modelSize.newValue);
-    }
-});
-
+/**
+ * Function to load the initial settings from Chrome storage.
+ *
+ * @returns {Promise} A promise that resolves when the initial settings are loaded.
+ */
 const loadInitialSettings = () => {
     const loadI2TSettings = new Promise((resolve, reject) => {
         chrome.storage.sync.get(['modelSize'], (result) => {
@@ -149,6 +173,13 @@ setInterval(() => {
         log.benchmark(`Available Memory: ${availableMemoryMB.toFixed(2)} MB`);
     });
 }, 10000);
+
+// Listen for changes to extension settings
+chrome.storage.sync.onChanged.addListener((changes) => {
+    if (changes.modelSize) {
+        setModel(changes.modelSize.newValue);
+    }
+});
 
 // Load initial settings
 loadInitialSettings();

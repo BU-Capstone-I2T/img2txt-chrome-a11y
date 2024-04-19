@@ -24,7 +24,7 @@ let divName = DEBUG_DIV_NAME;
  * Send a log message to the background script, and log it to the console.
  *
  * @param {string} msg the message to log
- * @param {object} loglevel the level of the log
+ * @param {Object} loglevel the level of the log
  */
 const log = (msg, loglevel) => {
     if (!loggingEnabled) return;
@@ -36,13 +36,12 @@ const log = (msg, loglevel) => {
     chrome.runtime.sendMessage({ action: ACTION_LOG, message: msg, level: loglevel });
 }
 
-// Set up a listener to remove all annotations if the user clicks
-// the left mouse button.
-window.addEventListener('click', clickHandler, false);
 /**
- * Removes text elements from DOM on a left click.
+ * Removes text elements from DOM when the user clicks the left mouse button.
+ *
+ * @param {MouseEvent} mouseEvent the mouse event
  */
-function clickHandler(mouseEvent) {
+function removeTextOnLeftClick(mouseEvent) {
     if (mouseEvent.button === 0 && !displayEnabled) {
         const textDivs = document.getElementsByClassName(divName);
         for (const div of textDivs) {
@@ -51,6 +50,17 @@ function clickHandler(mouseEvent) {
     }
 }
 
+// Set up a listener to remove all annotations if the user clicks
+// the left mouse button.
+window.addEventListener('click', removeTextOnLeftClick, false);
+
+/**
+ * Adds a text element to an image node. Used for displaying alt text on images for
+ * sighted users.
+ *
+ * @param {HTMLImageElement} imgNode
+ * @param {string} textContent
+ */
 function addTextElementToImageNode(imgNode, textContent) {
     const originalParent = imgNode.parentElement;
     const container = document.createElement('div');
@@ -80,7 +90,15 @@ function addTextElementToImageNode(imgNode, textContent) {
     text.textContent = textContent;
 }
 
-// This function will be executed on each image once it is loaded
+/**
+ * Sends an image to the service worker for description, and updates the alt text of the image
+ * with the response from the service worker.
+ * This function will be executed on each image once it is loaded.
+ *
+ * @param {HTMLImageElement} img The image to describe
+ * @param {HTMLImageElement} drawableImg The image to draw to a canvas.
+ *                                       This is necessary for CORS-protected images.
+ */
 const sendImageToServiceWorker = (img, drawableImg) => {
     // Check if the image url ends in .svg
     if (img.src.endsWith('.svg')) {
@@ -126,7 +144,14 @@ const sendImageToServiceWorker = (img, drawableImg) => {
     });
 };
 
-// Function to add a 'load' event listener to an image
+/**
+ * Adds a load listener to an image element. If the image is protected by CORS, a copy of the image
+ * is created with crossOrigin set to 'anonymous' so that it can be drawn to a canvas.
+ *
+ * When the image is loaded, it will be sent to the service worker for description.
+ *
+ * @param {HTMLImageElement} img the image to add the load listener to
+ */
 const addLoadListenerToImage = (img) => {
     if (img.crossOrigin === 'anonymous') {
         // Check if the image is already loaded (important for cached images)
@@ -154,7 +179,9 @@ const addLoadListenerToImage = (img) => {
 };
 
 
-// Observe the DOM for added images
+/**
+ * Observes the DOM for changes and adds load listeners to any images that are added.
+ */
 const observeDOMChanges = () => {
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -210,7 +237,10 @@ const loadInitialSettings = () => {
     });
 };
 
-// Add event listeners to all images currently in the DOM
+/**
+ * Initialize the Chrome plugin on the current page by adding load listeners to all images
+ * currently in the DOM, and observing the DOM for changes to add load listeners to new images.
+ */
 const initialize = () => {
     log("Initializing Chrome plugin", LogLevels.DEBUG);
     document.querySelectorAll('img').forEach(addLoadListenerToImage);
@@ -218,7 +248,7 @@ const initialize = () => {
     log("Chrome plugin initialized", LogLevels.DEBUG);
 };
 
-// Execute the initialization function
+// Load the initial settings and execute the initialization function
 loadInitialSettings().then(initialize).catch((err) => {
     console.error(err);
 });

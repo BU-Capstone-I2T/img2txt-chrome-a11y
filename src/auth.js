@@ -6,7 +6,15 @@
 // Token promise
 let tokenPromise = null;
 
-// Gets access token from storage
+/**
+ * Function to get the access token from Chrome storage.
+ * @example
+ * getToken().then(token => console.log(token));
+ *
+ * @returns {Promise<string>} A promise that resolves to the access token.
+ *                            If the token is not yet set, the promise will resolve
+ *                            when the token is eventually set.
+ */
 export const getToken = () => {
     if (!tokenPromise) {
         tokenPromise = new Promise((resolve) => {

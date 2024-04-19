@@ -17,14 +17,10 @@ const log = new Logger('i2t-model-xs', getToken);
 
 // How many predictions to take.
 const TOPK_PREDICTIONS = 2;
-const FIVE_SECONDS_IN_MS = 5000;
 
 /**
- * Async loads a mobilenet on construction.  Subsequently handles
+ * Asynchronously loads a mobilenet on construction.  Subsequently handles
  * requests to classify images through the .analyzeImage API.
- * Successful requests will post a chrome message with
- * 'IMAGE_CLICK_PROCESSED' action, which the content.js can
- * hear and use to manipulate the DOM.
  */
 export class ImageClassifier {
     constructor() {
