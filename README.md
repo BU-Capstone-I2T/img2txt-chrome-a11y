@@ -15,6 +15,10 @@ This project uses the following technologies:
 - [TensorFlow.js](https://www.tensorflow.org/js)
 - [EditorConfig](https://editorconfig.org/) (for consistent coding styles, install the Editorconfig plugin for your IDE)
 
+## Pre-requisites
+- [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) installed on your machine.
+We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage your Node.js versions.
+
 ## Installation
 
 To install this Chrome extension, follow these steps:
