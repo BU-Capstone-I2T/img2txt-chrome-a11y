@@ -14,7 +14,20 @@ const sendLoginInfo = () => {
         password: document.getElementById('password').value
     };
     console.log(JSON.stringify(message));
-    chrome.runtime.sendMessage(message).then(r => console.log("FINISHED")).catch((e) => {
+    chrome.runtime.sendMessage(message, (response) => {
+        console.log(response);
+        const statusDisplay = document.getElementById('status');
+        if (response.success) {
+            // Print login success message
+            statusDisplay.textContent = 'Login successful!';
+            statusDisplay.setAttribute('style', 'visibility: visible; color: green;');
+        } else {
+            // Display error message
+            statusDisplay.textContent = response.message;
+            statusDisplay.setAttribute('style', 'visibility: visible; color: red;');
+        }
+
+    }).then(r => console.log("FINISHED")).catch((e) => {
         console.log("CAUGHT error", e);
     });
 }

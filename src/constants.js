@@ -8,9 +8,11 @@
 export const ACTION_DESCRIBE_IMAGE = 'DESCRIBE_IMAGE';
 export const ACTION_LOGIN = 'LOGIN';
 export const ACTION_LOG = 'LOG';
+export const ACTION_FEEDBACK = 'FEEDBACK';
 export const SERVER_URL = 'https://i2tcapstone.azurewebsites.net';
 export const SERVER_LOGIN_PATH = "/users/login"
-export const SERVER_LOG = "/logs"
+export const SERVER_LOG_PATH = "/logs"
+export const SERVER_FEEDBACK_PATH = "/i2t/feedback"
 export const IMAGE_SIZE = 224; // Image size expected by the i2t model
 export const DEFAULT_LOGGING_ENABLED = true;
 export const DEFAULT_ALT_TEXT_DISPLAY_DISABLED = false;

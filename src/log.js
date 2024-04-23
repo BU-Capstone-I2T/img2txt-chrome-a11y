@@ -10,7 +10,7 @@
  *   - timestamp: the timestamp of the log message
  *   - stacktrace: the stack trace of the log message (optional)
  */
-import { SERVER_URL, SERVER_LOG, DEFAULT_LOGGING_ENABLED } from './constants';
+import { SERVER_URL, SERVER_LOG_PATH, DEFAULT_LOGGING_ENABLED } from './constants';
 
 let loggingEnabled = DEFAULT_LOGGING_ENABLED;
 
@@ -102,7 +102,7 @@ export default class Logger {
                 })
             };
 
-            fetch(`${SERVER_URL}${SERVER_LOG}`, options)
+            fetch(`${SERVER_URL}${SERVER_LOG_PATH}`, options)
                 .catch(err => console.error(err));
         });
     }
