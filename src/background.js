@@ -105,7 +105,7 @@ const describe = (message, sendResponse) => {
 
     // Request the i2t model to describe the image
     model.describeImage(imageData, message.url).then((description) => {
-        sendResponse({ description: description });
+        sendResponse({ description: "AI Description: " + description });
     }).catch((err) => {
         log.error(err);
         sendResponse({ description: "An error occurred while describing the image." });
