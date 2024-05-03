@@ -116,12 +116,12 @@ export class NLPModel {
             lowpred = low.map(prediction => prediction.className);
         }
 
-        let result = "Image that ";
+        let result = "";
         // Confident
         if (highpred.length > 0) {
-            result += "contains ";
+            result += "likely contains ";
             if (highpred.length > 1) {
-                result += `${highpred.slice(0, -1).join(', ')} and ${highpred[highpred.length - 1]}`;
+                result += `${highpred.slice(0, -1).join(', ')} and/or ${highpred[highpred.length - 1]}`;
             } else {
                 result += `${highpred[0]}`;
             }
@@ -130,12 +130,12 @@ export class NLPModel {
         // Not confident
         if (midpred.length > 0) {
             if (highpred.length > 0) {
-                result += " and maybe has ";
+                result += ", and/or may contain ";
             } else {
                 result += "may contain ";
             }
             if (midpred.length > 1) {
-                result += `${midpred.slice(0, -1).join(', ')} and ${midpred[midpred.length - 1]}`;
+                result += `${midpred.slice(0, -1).join(', ')} and/or ${midpred[midpred.length - 1]}`;
             } else {
                 result += `${midpred[0]}`;
             }
@@ -144,12 +144,12 @@ export class NLPModel {
         // Very much not confident
         if (lowpred.length > 0) {
             if (highpred.length === 0 && midpred.length === 0) {
-                result += "possibly contains ";
+                result += "as a stretch, could contain ";
             } else {
-                result += " and could possibly have ";
+                result += ", and/or, as a stretch, could contain ";
             }
             if (lowpred.length > 1) {
-                result += `${lowpred.slice(0, -1).join(', ')} and ${lowpred[lowpred.length - 1]}`;
+                result += `${lowpred.slice(0, -1).join(', ')} and/or ${lowpred[lowpred.length - 1]}`;
             } else {
                 result += `${lowpred[0]}`;
             }

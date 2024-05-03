@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Alt Text AI",
   "description": "Generates image descriptions for use with screen readers",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "action": {
     "default_popup": "popup/I2T.html",
     "default_icon": "images/icon128.png"
