@@ -1,7 +1,7 @@
 # Usability Testing Results
 - Interview Date: 05/02/2024
 - Extension Version: 0.3.0
-- Interviewer: Daniel Luper
+- Interviewer: Daniel Luper (developer)
 - Interviewee: Alpha Tester (100\% blind, uses VoiceOver on MacOS daily)
 
 ### Image Descriptions
