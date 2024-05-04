@@ -12,7 +12,7 @@ import * as tf from '@tensorflow/tfjs';
 import { getToken } from './auth';
 import Logger from './log';
 import { IMAGE_SIZE } from './constants';
-import { SIMPLE_IMAGENET_LABELS, FULL_IMAGENET_LABELS } from './imagenet_labels';
+import { SIMPLE_IMAGENET_LABELS, FULL_IMAGENET_LABELS } from './imagenet-labels';
 
 const log = new Logger('i2t-model-xs', getToken);
 
