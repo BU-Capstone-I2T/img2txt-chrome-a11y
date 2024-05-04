@@ -12,6 +12,7 @@ import * as tf from '@tensorflow/tfjs';
 import { getToken } from './auth';
 import Logger from './log';
 import { IMAGE_SIZE } from './constants';
+import { SIMPLE_IMAGENET_LABELS, FULL_IMAGENET_LABELS } from './imagenet_labels';
 
 const log = new Logger('i2t-model-xs', getToken);
 
@@ -78,6 +79,7 @@ export class ImageClassifier {
     }
 }
 
+const FULL_TO_SIMPLE_LABELS = new Map(FULL_IMAGENET_LABELS.map((label, index) => [label, SIMPLE_IMAGENET_LABELS[index]]));
 
 // Thresholds for LOW_CONFIDENCE_THRESHOLD and HIGH_CONFIDENCE_THRESHOLD,
 // controlling which messages are printed.
@@ -96,6 +98,10 @@ export class NLPModel {
             return `Image unclear`;
         }
 
+        const getLabel = (prediction) => {
+            return FULL_TO_SIMPLE_LABELS.get(prediction.className);
+        }
+
         // Seperate predictions based on confidence
         let highpred = [];
         let midpred = [];
@@ -103,17 +109,17 @@ export class NLPModel {
         // Grab confident predictions
         const high = predictions.filter(prediction => prediction.probability >= HIGH_CONFIDENCE_THRESHOLD);
         if (high.length > 0) {
-            highpred = high.map(prediction => prediction.className);
+            highpred = high.map(getLabel);
         }
         // Grab mid predictions
         const mid = predictions.filter(prediction => prediction.probability >= LOW_CONFIDENCE_THRESHOLD && prediction.probability < HIGH_CONFIDENCE_THRESHOLD);
         if (mid.length > 0) {
-            midpred = mid.map(prediction => prediction.className);
+            midpred = mid.map(getLabel);
         }
         // Grab low predictions
         const low = predictions.filter(prediction => prediction.probability < LOW_CONFIDENCE_THRESHOLD);
         if (low.length > 0) {
-            lowpred = low.map(prediction => prediction.className);
+            lowpred = low.map(getLabel);
         }
 
         let result = "";
