@@ -132,6 +132,11 @@ const login = (user, pass, sendResponse) => {
             if (!response.ok) {
                 log.error(`Failed to login: ${response.status} ${response.statusText}`);
                 response.json().then(data => {
+                    if (data.detail instanceof Array) {
+                        if (data.detail.length > 0) {
+                            data.detail = data.detail[0].msg;
+                        }
+                    }
                     sendResponse({ success: false, message: data.detail, status: response.status })
                 })
             } else {

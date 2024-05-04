@@ -14,10 +14,10 @@ Examples:
 ![the JSON representation of a single error log with the following message: "Could not load image from external source: "](images/log1.png)
 ![the JSON representation of a single debug log from content.js with the following message: "Adding load listener for CORS-protected image: "](images/log2.png)
 
-### Describing GIFs
+### Describing GIFs (fixed in 0.4.1)
 Our image captioning models are not trained to describe GIFs, and yet the logs show that the extension is trying to describe them. If the source ends with `.gif`, the extension should not attempt to describe the image.
 
-### Describing icons
+### Describing icons (fixed in 0.4.1)
 Our image captioning models are not trained to describe icons and other small images, and yet the logs show that the extension is trying to describe them. Additionally, accessibility guidelines like [WCAG 2.1](https://www.w3.org/WAI/WCAG21/quickref/) do not require alt text for decorative images. Furthermore, some webpages (like Google Search results), have lots of small icons, and our extension gets a big performance hit from trying to describe all of them. To combat these 3 issues (inaccuracy, deviation from guidelines, and reduced performance), we propose the following policy: if the image is smaller than a certain size, the extension should not attempt to describe the image.
 
 ### Duplicate logs

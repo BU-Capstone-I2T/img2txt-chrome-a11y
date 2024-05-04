@@ -18,3 +18,4 @@ export const DEFAULT_LOGGING_ENABLED = true;
 export const DEFAULT_ALT_TEXT_DISPLAY_DISABLED = false;
 export const DEFAULT_MODEL_SIZE = 'xs';
 export const DEBUG_DIV_NAME = 'alt_text_display_box';
+export const MIN_IMAGE_PIXELS = 100*100; // Ignore images with less than 100x100 pixels

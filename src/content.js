@@ -13,7 +13,8 @@ import {
     ACTION_FEEDBACK,
     IMAGE_SIZE,
     DEFAULT_LOGGING_ENABLED,
-    DEFAULT_ALT_TEXT_DISPLAY_DISABLED, DEBUG_DIV_NAME
+    DEFAULT_ALT_TEXT_DISPLAY_DISABLED, DEBUG_DIV_NAME,
+    MIN_IMAGE_PIXELS
 } from "./constants";
 import { LogLevels } from "./log";
 
@@ -194,9 +195,22 @@ const sendImageToServiceWorker = (img, drawableImg) => {
         return;
     }
 
+    // Check if the image url ends in .gif
+    if (img.src.endsWith('.gif')) {
+        log(`Image ${img.src} is a GIF and will not be described`, LogLevels.WARN);
+        return;
+    }
+
     // Check if the image already has alt text
     if (img.alt) {
         log(`Image ${img.src} already has alt text: ${img.alt}`, LogLevels.WARN);
+        return;
+    }
+
+    // Check if the image should be ignored based on its size
+    if (img.width * img.height < MIN_IMAGE_PIXELS) {
+        log(`Image ${img.src} is too small to describe: ${img.width}x${img.height}`,
+            LogLevels.WARN);
         return;
     }
 

@@ -19,7 +19,7 @@ const sendLoginInfo = () => {
         const statusDisplay = document.getElementById('status');
         if (response.success) {
             // Print login success message
-            statusDisplay.textContent = 'Login successful!';
+            statusDisplay.textContent = 'Login successful! You may continue using the extension as usual.';
             statusDisplay.setAttribute('style', 'visibility: visible; color: green;');
         } else {
             // Display error message
@@ -36,4 +36,11 @@ const sendLoginInfo = () => {
 document.addEventListener("DOMContentLoaded", () => {
     // Listen for the login button to be clicked
     document.getElementById("loginButton").addEventListener("click", sendLoginInfo);
+
+    // Listen for the enter key to be pressed in the password field
+    document.getElementById("password").addEventListener("keyup", (event) => {
+        if (event.key === "Enter") {
+            sendLoginInfo();
+        }
+    });
 });

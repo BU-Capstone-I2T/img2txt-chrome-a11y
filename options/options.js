@@ -58,7 +58,9 @@ const saveOptions = () => {
     chrome.storage.sync.set({modelSize: modelSize, logging: loggingEnabled, altText: altTextEnabled}, () => {
         // Announce the save confirmation
         const status = document.getElementById('status');
-        status.textContent = `Settings saved. Priority: ${priority}, Logging: ${loggingEnabled ? 'Enabled' : 'Disabled'}, Alt Text Display: ${altTextEnabled ? 'Enabled' : 'Disabled'}.`;
+        status.textContent = 'Settings saved. For changes to take effect, refresh open tabs. '
+            + `Priority: ${priority}, Logging: ${loggingEnabled ? 'Enabled' : 'Disabled'}, `
+            + `Alt Text Display: ${altTextEnabled ? 'Enabled' : 'Disabled'}.`;
         status.style.visibility = 'visible';
         setTimeout(() => status.style.visibility = 'hidden', 4000);
     });
