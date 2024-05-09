@@ -68,6 +68,42 @@ const greedy_search = (img_e, model, wordtoix, ixtoword, max_length = 74) => {
     return final;
 }
 
+/**
+ * Beam search to generate a caption for the image
+ *
+ * @param {tf.Tensor} img_e Encoded vector-representation of the image
+ * @param {*} model Image feature to image caption model to use for prediction
+ * @param {Object} wordtoix Mapping of word to index
+ * @param {Object} ixtoword Mapping of index to word
+ * @param {number} max_length Maximum length of the caption (default: 74)
+ * @param {number} beam_index Beam index (default: 3)
+ * @returns {string} Description of the image
+ */
+const beam_search = (img_e, model, wordtoix, ixtoword, max_length = 74, beam_index = 3) => {
+    const start = [wordtoix["startseq"]];
+    let start_word = [[start, 0.0]];
+    while (start_word[0][0].length < max_length) {
+        let temp = [];
+        for (let s of start_word) {
+            const par_caps = tf.pad(tf.tensor2d(s[0], [1, s[0].length]), [[0, 0], [0, max_length - s[0].length]]);
+            const e = img_e;
+            const preds = model.predict([e, par_caps], { verbose: 0 });
+            const word_preds = tf.topk(preds, beam_index).indices.dataSync();
+            for (let w of word_preds) {
+                const next_cap = [...s[0]];
+                next_cap.push(w);
+                const prob = s[1] + preds.dataSync()[w];
+                temp.push([next_cap, prob]);
+            }
+        }
+        start_word = temp.sort((a, b) => a[1] - b[1]).slice(-beam_index);
+    }
+    const start_word_final = start_word.slice(-1)[0][0];
+    const intermediate_caption = start_word_final.map(i => ixtoword[i]);
+    const final_caption = intermediate_caption.slice(1).join(' ').split('endseq')[0];
+    return final_caption;
+}
+
 export default class I2TModelL {
 
     constructor() {
